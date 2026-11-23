@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>СценаПлан — Управление мероприятиями</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="brand-plus">+</span>
+                <span class="brand-name">СценаПлан</span>
+            </div>
+            <nav class="nav">
+                <button type="button" class="nav-item active" data-view="events">Главная и мероприятия</button>
+                <button type="button" class="nav-item" data-view="calendar">Календарь мероприятий</button>
+            </nav>
+        </aside>
+
+        <div class="workspace">
+            <header class="topbar">
+                <input type="text" id="search-input" class="search-box" placeholder="Поиск по мероприятиям, залам, организаторам...">
+                <button type="button" id="open-modal-btn" class="btn-add">+ Добавить мероприятие</button>
+            </header>
+
+            <main class="content">
+                <section id="view-events">
+                    <div class="page-head">
+                        <div>
+                            <h1>Мероприятия площадки</h1>
+                            <p>Добавление, просмотр, редактирование и удаление мероприятий</p>
+                        </div>
+                        <div class="counter">Всего: <span id="total-count">0</span></div>
+                    </div>
+
+                    <div class="panel">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Дата и время</th>
+                                    <th>Мероприятие</th>
+                                    <th>Зал</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="events-tbody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="view-calendar" class="panel hidden">
+                    <h2>Календарь занятости залов</h2>
+                    <p class="muted">Краткий список событий по залам и датам.</p>
+                    <div id="calendar-list" class="calendar-list"></div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div id="modal-backdrop" class="modal-backdrop hidden">
+        <div class="modal">
+            <div class="modal-head">
+                <h2 id="modal-title">Новое мероприятие</h2>
+                <button type="button" id="close-modal-btn" class="icon-close">×</button>
+            </div>
+            <form id="event-form" novalidate>
+                <div class="field">
+                    <label for="event-title">Название мероприятия *</label>
+                    <input type="text" id="event-title" required>
+                </div>
+                <div class="field">
+                    <label for="event-organizer">Организатор / исполнитель *</label>
+                    <input type="text" id="event-organizer" required>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="event-date">Дата *</label>
+                        <input type="date" id="event-date" required>
+                    </div>
+                    <div class="field">
+                        <label for="event-time">Время *</label>
+                        <input type="time" id="event-time" required>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="event-hall">Зал *</label>
+                        <select id="event-hall">
+<option value="Большой зал">Большой зал</option>
+                            <option value="Малый зал">Малый зал</option>
+                            <option value="Камерный зал">Камерный зал</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="event-status">Статус *</label>
+                        <select id="event-status">
+                            <option value="Запланировано">Запланировано</option>
+                            <option value="Подтверждено">Подтверждено</option>
+                            <option value="На согласовании">На согласовании</option>
+                            <option value="Отменено">Отменено</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="form-error" class="form-error hidden"></div>
+                <div class="modal-actions">
+                    <button type="button" id="cancel-modal-btn" class="btn-cancel">Отмена</button>
+                    <button type="submit" class="btn-save">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

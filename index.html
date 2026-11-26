@@ -3,11 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>СценаПлан — Управление мероприятиями</title>
+    <title>СценаПлан — Управление мероприятиями (SQLite)</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
 </head>
 <body>
-    <div class="app">
+    <!-- Экран авторизации -->
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-card">
+            <div class="auth-brand">
+                <span class="brand-plus">+</span>
+                <span>СценаПлан</span>
+            </div>
+            <h1>Вход в информационную систему</h1>
+            <p class="auth-subtitle">Авторизуйтесь для управления расписанием и залами концертной площадки</p>
+
+            <form id="login-form" novalidate>
+                <div class="field">
+                    <label for="login-input">Логин сотрудника *</label>
+                    <input type="text" id="login-input" placeholder="Например: admin" autocomplete="username" required>
+                </div>
+                <div class="field">
+                    <label for="password-input">Пароль *</label>
+                    <input type="password" id="password-input" placeholder="Введите пароль" autocomplete="current-password" required>
+                </div>
+                <div id="login-error" class="form-error hidden"></div>
+                <button type="submit" class="btn-save auth-submit">Войти в систему</button>
+            </form>
+
+            <div class="auth-hint">
+                <span>Тестовый доступ: <strong>admin</strong> / <strong>admin123</strong></span>
+                <button type="button" id="fill-demo-btn" class="link-btn">Заполнить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основное рабочее пространство -->
+    <div id="app-shell" class="app hidden">
         <aside class="sidebar">
             <div class="brand">
                 <span class="brand-plus">+</span>
@@ -17,12 +49,27 @@
                 <button type="button" class="nav-item active" data-view="events">Главная и мероприятия</button>
                 <button type="button" class="nav-item" data-view="calendar">Календарь мероприятий</button>
             </nav>
+            <div class="db-box">
+                <div class="db-status" id="db-status">SQLite: инициализация...</div>
+                <button type="button" id="export-db-btn" class="db-btn">Скачать БД (.sqlite)</button>
+                <label class="db-btn db-upload-label">
+                    Загрузить БД
+                    <input type="file" id="import-db-input" accept=".sqlite,.db" hidden>
+                </label>
+            </div>
         </aside>
 
         <div class="workspace">
             <header class="topbar">
                 <input type="text" id="search-input" class="search-box" placeholder="Поиск по мероприятиям, залам, организаторам...">
-                <button type="button" id="open-modal-btn" class="btn-add">+ Добавить мероприятие</button>
+                <div class="topbar-right">
+                    <div class="user-pill">
+                        <span id="current-user-name">Сотрудник</span>
+                        <small id="current-user-role">Роль</small>
+                    </div>
+                    <button type="button" id="open-modal-btn" class="btn-add">+ Добавить мероприятие</button>
+                    <button type="button" id="logout-btn" class="btn-sm">Выйти</button>
+                </div>
             </header>
 
             <main class="content">
@@ -30,9 +77,25 @@
                     <div class="page-head">
                         <div>
                             <h1>Мероприятия площадки</h1>
-                            <p>Добавление, просмотр, редактирование и удаление мероприятий</p>
+                            <p>Добавление, просмотр, редактирование и удаление мероприятий (БД SQLite)</p>
                         </div>
                         <div class="counter">Всего: <span id="total-count">0</span></div>
+                    </div>
+
+                    <div class="toolbar-filters">
+                        <select id="filter-hall" class="filter-select">
+                            <option value="ALL">Все залы</option>
+                            <option value="Большой зал">Большой зал</option>
+                            <option value="Малый зал">Малый зал</option>
+                            <option value="Камерный зал">Камерный зал</option>
+                        </select>
+                        <select id="filter-status" class="filter-select">
+                            <option value="ALL">Все статусы</option>
+                            <option value="Запланировано">Запланировано</option>
+                            <option value="Подтверждено">Подтверждено</option>
+                            <option value="На согласовании">На согласовании</option>
+                            <option value="Отменено">Отменено</option>
+                        </select>
                     </div>
 
                     <div class="panel">
@@ -53,7 +116,7 @@
 
                 <section id="view-calendar" class="panel hidden">
                     <h2>Календарь занятости залов</h2>
-                    <p class="muted">Краткий список событий по залам и датам.</p>
+                    <p class="muted">Краткий список событий по залам и датам (данные из таблицы events + halls).</p>
                     <div id="calendar-list" class="calendar-list"></div>
                 </section>
             </main>
@@ -89,7 +152,7 @@
                     <div class="field">
                         <label for="event-hall">Зал *</label>
                         <select id="event-hall">
-<option value="Большой зал">Большой зал</option>
+                            <option value="Большой зал">Большой зал</option>
                             <option value="Малый зал">Малый зал</option>
                             <option value="Камерный зал">Камерный зал</option>
                         </select>
@@ -107,7 +170,7 @@
                 <div id="form-error" class="form-error hidden"></div>
                 <div class="modal-actions">
                     <button type="button" id="cancel-modal-btn" class="btn-cancel">Отмена</button>
-                    <button type="submit" class="btn-save">Сохранить</button>
+                    <button type="submit" class="btn-save">Сохранить в БД</button>
                 </div>
             </form>
         </div>
